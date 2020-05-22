@@ -4,15 +4,12 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.Reflection.Emit;
-using System.Threading;
 
 namespace Test_Homework_3
 {
     public class Tests
     {
         public IWebDriver driver;
-        private WebDriverWait wait;
 
         [OneTimeSetUp]      //Открытие страницы перед выполнением всех тестов.
         public void BeforeTestSuit()
@@ -20,6 +17,7 @@ namespace Test_Homework_3
             driver = new ChromeDriver();
             driver.Navigate().GoToUrl("http:\\localhost:5000");
             driver.Manage().Window.Maximize();
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
         }
 
         [OneTimeTearDown]       //Закрытие страницы после выполнения всех тестов.
@@ -29,17 +27,6 @@ namespace Test_Homework_3
             driver.Quit();
         }
 
-        [SetUp]     //Ожидания в начале каждого теста.
-        public void BeforeTest()
-        {
-            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-        }
-
-        [TearDown]          //Ожидания в конце каждого теста.
-        public void AfterTest()
-        {
-            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-        }
         [Test]
         public void Test1_Login()   //Тест на Логин.
         {
@@ -55,17 +42,12 @@ namespace Test_Homework_3
         public void Test2_CreateProduct()   // Созданиие нового продукта.
         {
             driver.FindElement(By.LinkText("All Products")).Click();
-            Thread.Sleep(3000);
             driver.FindElement(By.LinkText("Create new")).Click();
-            Thread.Sleep(5000);
             driver.FindElement(By.Id("ProductName")).SendKeys("Cake pops");
-
             var selectElement = new SelectElement(driver.FindElement(By.Id("CategoryId")));
-            //Thread.Sleep(2000);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
             selectElement.SelectByText("Confections");
             selectElement = new SelectElement(driver.FindElement(By.Id("SupplierId")));
-            //Thread.Sleep(2000);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
             selectElement.SelectByText("Specialty Biscuits, Ltd.");
             driver.FindElement(By.Id("UnitPrice")).SendKeys("15");
@@ -83,7 +65,6 @@ namespace Test_Homework_3
         public void Test3_ChekProduct()      // Проверка полей продукта после его создания.
         {
             driver.FindElement(By.LinkText("Cake pops")).Click();
-            //Thread.Sleep(2000);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
             Assert.AreEqual("Cake pops", driver.FindElement(By.Id("ProductName")).GetAttribute("value"));
             Assert.AreEqual("Confections", driver.FindElement(By.XPath("//*[@id=\"CategoryId\"]/option[@selected=\"selected\"]")).Text);
@@ -97,8 +78,6 @@ namespace Test_Homework_3
             driver.FindElement(By.Id("UnitPrice")).Clear();
             driver.FindElement(By.Id("UnitPrice")).SendKeys("15");// Перезапись в поле цены, так как происходит ошибка в формате данных
             driver.FindElement(By.CssSelector(".btn")).Click();
-            //Thread.Sleep(2000);
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
             // Проверка на открытие страницы All Products после нажатия кнопки "Отправить" страницы Create New.
             Assert.AreEqual("All Products", driver.FindElement(By.XPath("//h2[contains(.,'All Products')]")).Text);
@@ -109,10 +88,9 @@ namespace Test_Homework_3
         public void Test4_DeleteProduct()      // Проверка удаления продукта.
         {
             driver.FindElement(By.XPath("//a[contains(text(),'Cake pops')]/../..//a[contains(text(),'Remove')]")).Click();
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
             //driver.SwitchTo().Alert().SendKeys(Keys.Enter);
             new Actions(driver).SendKeys(Keys.Enter).Build().Perform();
-            Thread.Sleep(5000);
 
             //Проверка на отстутствие продукта Cake pops в Id=ProductName.
             Assert.AreNotEqual("Cake pops", driver.FindElement(By.Id("ProductName")).Text);
