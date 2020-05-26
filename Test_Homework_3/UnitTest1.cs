@@ -88,8 +88,6 @@ namespace Test_Homework_3
         public void Test4_DeleteProduct()      // Проверка удаления продукта.
         {
             driver.FindElement(By.XPath("//a[contains(text(),'Cake pops')]/../..//a[contains(text(),'Remove')]")).Click();
-            //Thread.Sleep(5000);
-            //driver.SwitchTo().Alert().SendKeys(Keys.Enter);
             new Actions(driver).SendKeys(Keys.Enter).Build().Perform();
 
             //Проверка на отстутствие продукта Cake pops в Id=ProductName.
